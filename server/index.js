@@ -12,7 +12,7 @@ const KoaStaic = require('koa-static');
 
 const { startSerial } = require('./serial.js');
 const { startMJPGStreamer } = require('./mjpg-streamer.js');
-
+const driver = require("./driver")(config.driverName);
 
 async function start() {
 
@@ -24,15 +24,22 @@ async function start() {
       console.log('new websocket connection');
       ws.on('message', function message(data) {
         const msg = JSON.parse(data.toString());
-        switch (msg.type) {
-          case 'write_serial':
-            writeSerial(msg.payload);
+        switch (msg.cmd) {
+          case 'keyevent':
+            driver.onKeyEvent(msg.payload[0], msg.payload[1], msg.payload[2]);
             break;
+          case 'mouseEvent':
+            driver.onMouseEvent(msg.payload[0], msg.payload[1]);
+            break;
+          default:
+            ws.send(JSON.stringify({
+              cmd: "UNKNOWN"
+            }));
         }
       });
 
       ws.send(JSON.stringify({
-        type: 'welcome',
+        cmd: 'welcome',
         payload: 'Open IP-KVM Server'
       }));
     }

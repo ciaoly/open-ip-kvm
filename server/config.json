@@ -7,5 +7,6 @@
     "res": "1920x1080",
     "fps": 30,
     "stream_port": 8010
-  }
+  },
+  "driverName": "ch9329"
 }
