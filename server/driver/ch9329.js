@@ -71,7 +71,7 @@ class DataFrame {
       sum += num;
     }
     return ((0xff & this._HEAD) + (this._HEAD >> 8 & 0xff) +
-      this._ADDR + this._CMD + this.LEN + sum) | 0xff;
+      this._ADDR + this._CMD + this.LEN + sum) % 0x100;
   }
 
   set SUM(val) { }
@@ -232,7 +232,7 @@ class KeyStatus {
     if (_hid) {
       // 普通按键
       if (this.normalKeys.length > 0) {
-        const index = this.normalKeys.indexOf(keyCode);
+        const index = this.normalKeys.indexOf(_hid);
         if (index >= 0) {
           this.normalKeys.splice(index, 1);
         }
