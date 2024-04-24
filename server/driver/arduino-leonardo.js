@@ -1,4 +1,4 @@
-const serial = require("../lib/serial");
+const { startSerial } = require("../lib/serial");
 
 const KB_EVT_START = 248;
 const KEY_SEQUENCE_EVT_START = 250;
@@ -243,7 +243,7 @@ module.exports = function(serialConfig) {
     return;
   }
 
-  _writeSerial = new serial(portPath, baudRate);
+  _writeSerial = startSerial(portPath, baudRate);
 
   return {
     onKeyEvent, onMouseEvent, inputSequence

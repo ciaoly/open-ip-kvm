@@ -1,4 +1,4 @@
-const serial = require("../lib/serial");
+const { startSerial } = require("../lib/serial");
 
 const CMD_ENUM = {
   CMD_GET_INFO: 1,
@@ -504,7 +504,7 @@ module.exports = function (serialConfig) {
     return;
   }
 
-  _writeSerial = new serial(portPath, baudRate);
+  _writeSerial = startSerial(portPath, baudRate);
 
   return {
     onKeyEvent, onMouseEvent, inputSequence, sendKeys
