@@ -31,6 +31,8 @@ async function start() {
           case 'mouseEvent':
             driver.onMouseEvent(msg.payload[0], msg.payload[1]);
             break;
+          case 'sendSequence':
+            driver.sendSequence(msg.payload)
           default:
             ws.send(JSON.stringify({
               cmd: "UNKNOWN"

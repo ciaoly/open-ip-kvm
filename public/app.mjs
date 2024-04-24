@@ -1,6 +1,4 @@
 import * as ws from './ws.mjs';
-import * as kb from './kb.mjs';
-import * as mouse from './mouse.mjs';
 
 new Vue({
   el: '#app',
@@ -76,14 +74,20 @@ new Vue({
           this.setScreenFocus(false);
           return;
         }
-        kb.sendEvent(this.$channel, evt.key, 'keydown');
+        this.$channel.send(JSON.stringify({
+          cmd: "keyevent",
+          payload: [evt.key, evt.keyCode, 'keydown']
+        }));
       });
 
       document.addEventListener('keyup', (evt) => {
         if (!this.isKeyCaptureActive) {
           return;
         }
-        kb.sendEvent(this.$channel, evt.key, 'keyup');
+        this.$channel.send(JSON.stringify({
+          cmd: "keyevent",
+          payload: [evt.key, evt.keyCode, 'keyup']
+        }));
       });
     },
     bindMouseHandler() {
@@ -93,30 +97,44 @@ new Vue({
         this.isPointorLocked =
           document.pointerLockElement &&
           document.pointerLockElement.classList.contains('screen');
-        mouse.sendEvent(this.$channel, '', 'reset');
+        this.$channel.send(JSON.stringify({
+          cmd: "mouseEvent",
+          payload: ['', 'reset']
+        }));
       });
 
       window.setInterval(() => {
         if (mouseMoveSlice[0] !== 0 || mouseMoveSlice[1] !== 0) {
-          mouse.sendEvent(this.$channel, mouseMoveSlice, 'move');
+          this.$channel.send(JSON.stringify({
+            cmd: "mouseEvent",
+            payload: [mouseMoveSlice, 'move']
+          }));
           mouseMoveSlice[0] = 0;
           mouseMoveSlice[1] = 0;
         }
       }, 30);
-
-      mouse.sendEvent(this.$channel, 1, 'config-move-factor');
+      this.$channel.send(JSON.stringify({
+        cmd: "mouseEvent",
+        payload: [1, 'config-move-factor']
+      }));
     },
     onScreenBlur() {
       this.isKeyCaptureActive = false;
       if (this.isPointorLocked) {
         this.setPointerLock(false);
       }
-      kb.sendEvent(this.$channel, '', 'reset');
+      this.$channel.send(JSON.stringify({
+        cmd: "keyevent",
+        payload: ['', 0, 'reset']
+      }));
     },
     onScreenFocus() {
       this.setDialog();
       this.isKeyCaptureActive = true;
-      kb.sendEvent(this.$channel, '', 'reset');
+      this.$channel.send(JSON.stringify({
+        cmd: "keyevent",
+        payload: ['', 0, 'reset']
+      }));
     },
     setScreenFocus(bool) {
       const screen = document.querySelector('.screen');
@@ -128,7 +146,7 @@ new Vue({
         try {
           this.setDialog();
           screen.requestPointerLock();
-        } catch (e) {}
+        } catch (e) { }
       } else {
         document.exitPointerLock();
       }
@@ -148,22 +166,34 @@ new Vue({
         return;
       }
       evt.preventDefault();
-      mouse.sendEvent(this.$channel, evt.button, 'mousedown');
+      this.$channel.send(JSON.stringify({
+        cmd: "mouseEvent",
+        payload: [evt.button, 'mousedown']
+      }));
     },
     onScreenMouseUp(evt) {
       if (!this.isPointorLocked) {
         return;
       }
-      mouse.sendEvent(this.$channel, evt.button, 'mouseup');
+      this.$channel.send(JSON.stringify({
+        cmd: "mouseEvent",
+        payload: [evt.button, 'mouseup']
+      }));
     },
     onScreenMouseWheel(evt) {
       if (!this.isPointorLocked) {
         return;
       }
-      mouse.sendEvent(this.$channel, evt.wheelDeltaY, 'wheel');
+      this.$channel.send(JSON.stringify({
+        cmd: "mouseEvent",
+        payload: [evt.wheelDeltaY, 'wheel']
+      }));
     },
     doRemotePaste() {
-      kb.sendSequence(this.$channel, this.pasteContent);
+      this.$channel.send(JSON.stringify({
+        cmd: "sendSequence",
+        payload: this.pasteContent
+      }));
       this.pasteContent = '';
     },
     setDialog(name) {
