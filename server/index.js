@@ -10,14 +10,15 @@ const ws = require('ws');
 const Koa = require('koa');
 const KoaStaic = require('koa-static');
 
-const { startSerial } = require('./serial.js');
+// const { startSerial } = require('./lib/serial.js');
 const { startMJPGStreamer } = require('./mjpg-streamer.js');
 const driver = require("./driver")(config.driverName);
 
 async function start() {
 
   try {
-    const writeSerial = startSerial(config.serialport);
+ //   const writeSerial = startSerial(config.serialport.portPath, config.serialport.baudRate);
+    hidDevice = driver(config.serialport);
     await startMJPGStreamer(config.mjpg_streamer);
 
     function websocketHandler(ws) {
@@ -26,13 +27,13 @@ async function start() {
         const msg = JSON.parse(data.toString());
         switch (msg.cmd) {
           case 'keyevent':
-            driver.onKeyEvent(msg.payload[0], msg.payload[1], msg.payload[2]);
+            hidDevice.onKeyEvent(msg.payload[0], msg.payload[1], msg.payload[2]);
             break;
           case 'mouseEvent':
-            driver.onMouseEvent(msg.payload[0], msg.payload[1]);
+            hidDevice.onMouseEvent(msg.payload[0], msg.payload[1]);
             break;
           case 'sendSequence':
-            driver.sendSequence(msg.payload)
+            hidDevice.sendSequence(msg.payload)
           default:
             ws.send(JSON.stringify({
               cmd: "UNKNOWN"
