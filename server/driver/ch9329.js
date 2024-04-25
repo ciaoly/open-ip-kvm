@@ -324,21 +324,12 @@ class MouseStatus {
 
   convertMovementPixel(args = []) {
     if (typeof args == "number" && !isNaN(args)) {
-      if (args >= 0) {
-        if (args < 128) {
-          // 避免小数
-          return args & 127;
-        } else {
-          return 127;
-        }
-      } else {
-        if (args > -128) {
-          // 避免小数
-          return 0xff & (args + 0x100);
-        } else {
-          return 0x80;
-        }
+      if (args >= 128) {
+        args = 127
+      } else if (args < -128) {
+        args = -128;
       }
+      return 255 & (args + 256);
     }
     if (Array.isArray(args)) {
       let ret = [];
