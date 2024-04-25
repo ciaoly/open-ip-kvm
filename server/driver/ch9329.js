@@ -323,14 +323,28 @@ class MouseStatus {
   }
 
   convertMovementPixel(args = []) {
-    if (typeof args == "number") {
-      return 0xff & (args + 256);
+    if (typeof args == "number" && !isNaN(args)) {
+      if (args >= 0) {
+        if (args < 128) {
+          // 避免小数
+          return args & 127;
+        } else {
+          return 127;
+        }
+      } else {
+        if (args > -128) {
+          // 避免小数
+          return 0xff & (args + 0x100);
+        } else {
+          return 0x80;
+        }
+      }
     }
     if (Array.isArray(args)) {
       let ret = [];
       for (let n of args) {
         if (!isNaN(parseInt(n))) {
-          ret.push(0xff & (parseInt(n) + 256));
+          ret.push(this.convertMovementPixel(parseInt(n)));
         }
       }
       return ret;
