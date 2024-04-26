@@ -12,6 +12,8 @@ new Vue({
     mouseMoveSlice: [0, 0],
     activeDialog: '',
     pasteContent: '',
+    ignoreEscapedDialog: false,
+    fullScreen: false
   },
   mounted() {
     this.init();
@@ -19,6 +21,9 @@ new Vue({
   methods: {
     async init() {
       try {
+        this.ignoreEscapedDialog = ["false", "no", "0"].indexOf(
+          localStorage.getItem("ignoreEscapedDialog")
+        ) < 0;
         const config = await this.fetchConfig();
         document.title = config.app_title;
 
@@ -92,15 +97,32 @@ new Vue({
     },
     bindMouseHandler() {
       const mouseMoveSlice = this.mouseMoveSlice;
+      const supportsKeyboardLock =
+        ('keyboard' in navigator) && ('lock' in navigator.keyboard);
 
       document.addEventListener('pointerlockchange', (evt) => {
         this.isPointorLocked =
           document.pointerLockElement &&
           document.pointerLockElement.classList.contains('screen');
+        if (!this.isPointorLocked && supportsKeyboardLock) {
+          this.setDialog("escaped");
+        }
         this.$channel.send(JSON.stringify({
           cmd: "mouseEvent",
           payload: ['', 'reset']
         }));
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+          this.fullScreen = false;
+          if (supportsKeyboardLock) {
+            navigator.keyboard.unlock();
+            console.log('Keyboard unlocked.');
+          }
+        } else {
+          this.fullScreen = true;
+        }
       });
 
       window.setInterval(() => {
@@ -189,6 +211,35 @@ new Vue({
         payload: [evt.wheelDeltaY, 'wheel']
       }));
     },
+    async lockEscapeKey() {
+      if (document.fullscreenElement) {
+        // 当前已处于全屏模式
+        document.exitFullscreen();
+        return;
+      }
+      // Feature detection.
+      const supportsKeyboardLock =
+        ('keyboard' in navigator) && ('lock' in navigator.keyboard);
+
+      if (supportsKeyboardLock) {
+        // 规避escape键, 但是这个特性只支持chromium
+        // 似乎只有进入全屏模式才可以锁定Escape键, 
+        // 单纯的进入PointerLocked模式是不可以锁定Escape键的
+        // The magic happens here… 🦄
+        await navigator.keyboard.lock(['Escape']);
+        console.log('Keyboard locked.');
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (err) {
+          navigator.keyboard.unlock();
+          console.error(`${err.name}: ${err.message}`);
+          console.log('Keyboard unlocked.');
+          // this.fullScreen = false;
+        }
+      } else {
+        document.documentElement.requestFullscreen();
+      }
+    },
     doRemotePaste() {
       this.$channel.send(JSON.stringify({
         cmd: "sendSequence",
@@ -206,4 +257,9 @@ new Vue({
       }
     },
   },
+  watch: {
+    ignoreEscapedDialog: function() {
+      localStorage.setItem("ignoreEscapedDialog", this.ignoreEscapedDialog);
+    }
+  }
 });

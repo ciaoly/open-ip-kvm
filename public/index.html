@@ -52,6 +52,12 @@
             title="Remote Paste (ASCII Only)"
           ></span>
           <span
+            @click="lockEscapeKey"
+            class="button"
+            title="全屏"
+            :class="[fullScreen ? 'bi-fullscreen-exit' : 'bi-fullscreen']"
+          ></span>
+          <span
             @click="setDialog('help')"
             class="button bi-question-circle"
             title="Help"
@@ -99,6 +105,23 @@
               Paste
             </button>
             <button class="dialog-btn" @click="setDialog()">Cancel</button>
+          </div>
+        </div>
+
+        <div v-show="activeDialog === 'escaped'" class="dialog trans-bg">
+          <div class="dialog-header">按下了Escape键</div>
+          <section class="auto">
+            <p>您似乎按下了Escape键. 对于浏览器来说, 当按下Escape键时, 将会自动退出鼠标捕获模式. 这时您会发现无法使用鼠标操作远程计算机</p>
+            <p>Chrome/Edge浏览器提供了一种新的特性, 当您进入"全屏模式"时, 可以避免网页响应Escape键.</p>
+            <p>如果您想使用该特性, 请点击下方的"进入全屏模式"按钮.</p>
+            <input class="form-check-input" type="checkbox" id="checkbox" v-model="ignoreEscapedDialog" />
+            <label class="form-check-label" for="checkbox">我已知晓, 不再弹出</label>
+          </section>
+          <div class="dialog-footer">
+            <button class="dialog-btn" @click="setDialog(), lockEscapeKey()">
+              进入全屏模式
+            </button>
+            <button class="dialog-btn" @click="setDialog()">取消</button>
           </div>
         </div>
 
