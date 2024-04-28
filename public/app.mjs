@@ -242,7 +242,7 @@ new Vue({
     },
     doRemotePaste() {
       this.$channel.send(JSON.stringify({
-        cmd: "sendSequence",
+        cmd: "inputSequence",
         payload: this.pasteContent
       }));
       this.pasteContent = '';

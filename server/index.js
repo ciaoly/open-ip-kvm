@@ -32,8 +32,8 @@ async function start() {
           case 'mouseEvent':
             hidDevice.onMouseEvent(msg.payload[0], msg.payload[1]);
             break;
-          case 'sendSequence':
-            hidDevice.sendSequence(msg.payload)
+          case 'inputSequence':
+            hidDevice.inputSequence(msg.payload)
           default:
             ws.send(JSON.stringify({
               cmd: "UNKNOWN"
