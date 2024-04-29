@@ -180,7 +180,7 @@ class KeyStatus {
     46: 0x4C,  // Delete
     144: 0x53, // Num Lock
     145: 0x47, // Scroll Lock
-    0x58: 0x58, //Right Enter
+    // 0x58: 0x58, //Right Enter
 
     // F1 - F12
     112: 0x3A, // F1
@@ -390,7 +390,7 @@ function asciiToKeycode(char) {
     if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
       // 字母键，返回对应的普通键盘键码和 Shift 键码
       const shiftKeyCode = charCode >= 65 && charCode <= 90 ? 16 : null; // 大写字母需要按下 Shift 键
-      return [charCode, shiftKeyCode];
+      return [char.toUpperCase().charCodeAt(0), shiftKeyCode];
     }
     // 检查是否为数字
     else if (charCode >= 48 && charCode <= 57) {
