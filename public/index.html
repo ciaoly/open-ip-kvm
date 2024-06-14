@@ -31,7 +31,20 @@
           class="screen"
           tabindex="1"
         />
-        <video class="screen" id="webrtc-output" v-if="enableVideo" :src="streamSrc" playsinline></video>
+        <video
+          class="screen"
+          id="webrtc-output"
+          v-if="enableVideo"
+          :src="streamSrc"
+          tabindex="1"
+          @focus="onScreenFocus"
+          @blur="onScreenBlur"
+          @mousemove="onScreenMouseMove"
+          @mouseup="onScreenMouseUp"
+          @mousedown="onScreenMouseDown"
+          @wheel="onScreenMouseWheel"
+          playsinline>
+        </video>
 
         <div class="float-zone trans-bg">
           <!-- <div>Open IP-KVM</div> -->

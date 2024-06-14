@@ -37,7 +37,10 @@ async function start() {
 
         // 将客户端连接添加到列表中
         clients.push(ctx.res);
-        startFFmpeg(config.ffmpeg_streamer);
+        // 启动 FFmpeg
+        if (clients.length === 1) {
+          await startFFmpeg(config.ffmpeg_streamer);
+        }
 
         // 当客户端断开连接时，将其从列表中移除
         ctx.req.on('close', () => {
@@ -48,6 +51,7 @@ async function start() {
         });
 
         // 返回一个未结束的响应
+        ctx.status = 200;
         ctx.respond = false;
       });
       // 监听 FFmpeg 推送的流数据
