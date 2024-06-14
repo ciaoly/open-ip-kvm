@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 
 let ffmpegProcess;
+let stoppedByMe = false;
 
 function startFFmpeg(opt) {
   if (ffmpegProcess) {
@@ -33,7 +34,13 @@ function startFFmpeg(opt) {
 
     ffmpegProcess.on('close', (code) => {
       console.log(`ffmpeg exited with code ${code}`);
-      ffmpegProcess = null;
+      if (stoppedByMe) {
+        stoppedByMe = false;
+        resolve();
+        return;
+      } else {
+        ffmpegProcess = null;
+      }
       if (code !== 0) {
         reject(new Error(`ffmpeg exited with code ${code}`));
       } else {
@@ -46,6 +53,7 @@ function startFFmpeg(opt) {
 function stopFFmpeg() {
   if (ffmpegProcess) {
     ffmpegProcess.kill();
+    stoppedByMe = true;
     ffmpegProcess = null;
   }
 }
