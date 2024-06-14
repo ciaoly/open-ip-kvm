@@ -20,7 +20,7 @@
       <div v-show="streamSrc" style="display: none">
 
         <img
-          v-if="streamSrc"
+          v-if="enableMjpeg"
           :src="streamSrc"
           @focus="onScreenFocus"
           @blur="onScreenBlur"
@@ -31,6 +31,7 @@
           class="screen"
           tabindex="1"
         />
+        <video class="screen" id="webrtc-output" v-if="enableVideo" :src="streamSrc" playsinline></video>
 
         <div class="float-zone trans-bg">
           <!-- <div>Open IP-KVM</div> -->

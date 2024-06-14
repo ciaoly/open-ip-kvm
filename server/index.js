@@ -4,7 +4,6 @@ const url = require('url');
 const config = require("./config.json");
 
 config.app_title = config.app_title || 'Open IP-KVM';
-config.mjpg_streamer.stream_port = config.mjpg_streamer.stream_port || 8010;
 
 const ws = require('ws');
 const Koa = require('koa');
@@ -25,6 +24,7 @@ async function start() {
     hidDevice = driver(config.serialport);
     // await startMJPGStreamer(config.mjpg_streamer);
     if (config.mjpg_streamer) {
+      config.mjpg_streamer.stream_port = config.mjpg_streamer.stream_port || 8010;
       const { startMJPGStreamer } = require('./mjpg-streamer.js');
       await startMJPGStreamer();
     } else if (config.ffmpeg_streamer) {
@@ -37,7 +37,7 @@ async function start() {
 
         // 将客户端连接添加到列表中
         clients.push(ctx.res);
-        startFFmpeg();
+        startFFmpeg(config.ffmpeg_streamer);
 
         // 当客户端断开连接时，将其从列表中移除
         ctx.req.on('close', () => {

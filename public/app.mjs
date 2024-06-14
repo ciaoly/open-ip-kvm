@@ -6,6 +6,8 @@ new Vue({
     // serviceHost: '10.0.0.235',
     serviceHost: location.hostname,
     streamSrc: '',
+    enableVideo: false,
+    enableMjpeg: false,
     $channel: null,
     isKeyCaptureActive: false,
     isPointorLocked: false,
@@ -27,19 +29,25 @@ new Vue({
         const config = await this.fetchConfig();
         document.title = config.app_title;
 
-        const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
-        if (!streamOk) {
-          throw new Error(
-            'Video stream is not ready, please check mjpeg process'
-          );
+        if (config.mjpg_streamer) {
+          const streamOk = await this.pingStream(config.mjpg_streamer.stream_port);
+          if (!streamOk) {
+            throw new Error(
+              'Video stream is not ready, please check mjpeg process'
+            );
+          } else {
+            this.enableMjpeg = true;
+            this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
+          }
+        } else if (config.ffmpeg_streamer) {
+          this.enableVideo = true;
+          this.streamSrc = `http://${this.serviceHost}:${config.ffmpeg_streamer.stream_port}/stream`;
         }
         this.$channel = await ws.init(
           `ws://${this.serviceHost}:${config.listen_port}/websocket`
         );
         this.bindKeyHandler();
         this.bindMouseHandler();
-
-        this.streamSrc = `http://${this.serviceHost}:${config.mjpg_streamer.stream_port}/?action=stream`;
       } catch (e) {
         alert(e.toString());
       }
